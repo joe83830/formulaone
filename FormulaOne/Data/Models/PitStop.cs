@@ -8,7 +8,7 @@ namespace FormulaOne.Data.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int PitstopId { get; set; }
         public int RaceId { get; set; }
         public int DriverId { get; set; }
         public int Stop { get; set; }

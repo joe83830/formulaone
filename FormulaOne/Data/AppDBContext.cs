@@ -49,12 +49,12 @@ namespace FormulaOne.Data
             modelBuilder.Entity<Driver>().HasKey(d => d.DriverId);
 
             // LapTime
-            modelBuilder.Entity<LapTime>().HasKey(lt => new { lt.RaceId, lt.DriverId, lt.Lap });
+            modelBuilder.Entity<LapTime>().HasKey(lt => lt.LapTimeId);
             modelBuilder.Entity<LapTime>().HasOne(lt => lt.Race).WithMany(r => r.LapTimes).HasForeignKey(lt => lt.RaceId);
             modelBuilder.Entity<LapTime>().HasOne(lt => lt.Driver).WithMany(d => d.LapTimes).HasForeignKey(lt => lt.DriverId);
 
             // PitStop
-            modelBuilder.Entity<PitStop>().HasKey(ps => new { ps.RaceId, ps.DriverId, ps.Stop });
+            modelBuilder.Entity<PitStop>().HasKey(ps => ps.PitstopId);
             modelBuilder.Entity<PitStop>().HasOne(ps => ps.Race).WithMany(r => r.PitStops).HasForeignKey(ps => ps.RaceId);
             modelBuilder.Entity<PitStop>().HasOne(ps => ps.Driver).WithMany(d => d.PitStops).HasForeignKey(ps => ps.DriverId);
 

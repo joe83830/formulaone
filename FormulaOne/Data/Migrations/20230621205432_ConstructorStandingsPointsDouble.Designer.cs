@@ -3,17 +3,20 @@ using System;
 using FormulaOne.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FormulaOne.Migrations
+namespace FormulaOne.Data.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230621205432_ConstructorStandingsPointsDouble")]
+    partial class ConstructorStandingsPointsDouble
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,6 +170,7 @@ namespace FormulaOne.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DriverId"));
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Dob")
@@ -184,7 +188,7 @@ namespace FormulaOne.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("Number")
+                    b.Property<int>("Number")
                         .HasColumnType("integer");
 
                     b.Property<string>("Surname")
@@ -211,8 +215,8 @@ namespace FormulaOne.Migrations
                     b.Property<int>("DriverId")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Points")
-                        .HasColumnType("double precision");
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Position")
                         .HasColumnType("integer");
@@ -238,17 +242,20 @@ namespace FormulaOne.Migrations
 
             modelBuilder.Entity("FormulaOne.Data.Models.LapTime", b =>
                 {
-                    b.Property<int>("LapTimeId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("RaceId")
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LapTimeId"));
 
                     b.Property<int>("DriverId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Lap")
                         .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Milliseconds")
                         .HasColumnType("integer");
@@ -256,36 +263,37 @@ namespace FormulaOne.Migrations
                     b.Property<int>("Position")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RaceId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("LapTimeId");
+                    b.HasKey("RaceId", "DriverId", "Lap");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("RaceId");
 
                     b.ToTable("LapTimes");
                 });
 
             modelBuilder.Entity("FormulaOne.Data.Models.PitStop", b =>
                 {
-                    b.Property<int>("PitstopId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("RaceId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PitstopId"));
-
                     b.Property<int>("DriverId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Stop")
                         .HasColumnType("integer");
 
                     b.Property<string>("Duration")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Lap")
                         .HasColumnType("integer");
@@ -293,21 +301,13 @@ namespace FormulaOne.Migrations
                     b.Property<int>("Milliseconds")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RaceId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Stop")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("PitstopId");
+                    b.HasKey("RaceId", "DriverId", "Stop");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("RaceId");
 
                     b.ToTable("PitStops");
                 });
@@ -333,12 +333,15 @@ namespace FormulaOne.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Q1")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Q2")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Q3")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("RaceId")
@@ -441,9 +444,11 @@ namespace FormulaOne.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("FastestLapSpeed")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FastestLapTime")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Grid")
@@ -455,7 +460,7 @@ namespace FormulaOne.Migrations
                     b.Property<long?>("Milliseconds")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("Number")
+                    b.Property<int>("Number")
                         .HasColumnType("integer");
 
                     b.Property<float>("Points")
@@ -481,6 +486,7 @@ namespace FormulaOne.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Time")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ResultId");
@@ -527,10 +533,11 @@ namespace FormulaOne.Migrations
                     b.Property<int>("DriverId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("FastestLap")
+                    b.Property<int>("FastestLap")
                         .HasColumnType("integer");
 
                     b.Property<string>("FastestLapTime")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Grid")
@@ -548,13 +555,14 @@ namespace FormulaOne.Migrations
                     b.Property<int>("Points")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("Position")
+                    b.Property<int>("Position")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("PositionOrder")
+                    b.Property<int>("PositionOrder")
                         .HasColumnType("integer");
 
                     b.Property<string>("PositionText")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("RaceId")
@@ -564,6 +572,7 @@ namespace FormulaOne.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Time")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ResultId");

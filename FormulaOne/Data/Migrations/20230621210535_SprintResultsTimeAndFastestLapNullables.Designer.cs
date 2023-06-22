@@ -3,17 +3,20 @@ using System;
 using FormulaOne.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FormulaOne.Migrations
+namespace FormulaOne.Data.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230621210535_SprintResultsTimeAndFastestLapNullables")]
+    partial class SprintResultsTimeAndFastestLapNullables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,17 +241,20 @@ namespace FormulaOne.Migrations
 
             modelBuilder.Entity("FormulaOne.Data.Models.LapTime", b =>
                 {
-                    b.Property<int>("LapTimeId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("RaceId")
                         .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LapTimeId"));
 
                     b.Property<int>("DriverId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Lap")
                         .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Milliseconds")
                         .HasColumnType("integer");
@@ -256,36 +262,37 @@ namespace FormulaOne.Migrations
                     b.Property<int>("Position")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RaceId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("LapTimeId");
+                    b.HasKey("RaceId", "DriverId", "Lap");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("RaceId");
 
                     b.ToTable("LapTimes");
                 });
 
             modelBuilder.Entity("FormulaOne.Data.Models.PitStop", b =>
                 {
-                    b.Property<int>("PitstopId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("RaceId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PitstopId"));
-
                     b.Property<int>("DriverId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Stop")
                         .HasColumnType("integer");
 
                     b.Property<string>("Duration")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Lap")
                         .HasColumnType("integer");
@@ -293,21 +300,13 @@ namespace FormulaOne.Migrations
                     b.Property<int>("Milliseconds")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RaceId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Stop")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("PitstopId");
+                    b.HasKey("RaceId", "DriverId", "Stop");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("RaceId");
 
                     b.ToTable("PitStops");
                 });
