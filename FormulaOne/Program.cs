@@ -1,7 +1,8 @@
 using FormulaOne.Data;
+using FormulaOne.Data.DTOs;
+using FormulaOne.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,22 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+app.MapGet("/drivers", async (AppDBContext db) =>
+{
+    var drivers = await db.Drivers.ToListAsync();
 
+    return drivers.Select(d => new DriverDTO
+    {
+        driverId = d.DriverId,
+        driverRef = d.DriverRef,
+        number = d.Number,
+        code = d.Code,
+        forename = d.Forename,
+        surname = d.Surname,
+        dob = d.Dob,
+        nationality = d.Nationality
+    }).ToList();
+});
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(swaggerUIOptions =>
