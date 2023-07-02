@@ -39,7 +39,6 @@ app.MapGet("/drivers", async (AppDBContext db) =>
 
     return drivers.Select(d => new DriverDTO
     {
-        driverId = d.DriverId,
         driverRef = d.DriverRef,
         number = d.Number,
         code = d.Code,
