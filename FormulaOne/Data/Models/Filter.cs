@@ -48,16 +48,9 @@
     {
         public static readonly string And = "AND";
         public static readonly string Or = "OR";
+        public static readonly string NONE = "NONE";
     }
 
-    public class ComplexFilter<T>
-    {
-        public string FilterType { get; set; }
-        public string Operator { get; set; }
-        public T Condition1 { get; set; }
-        public T Condition2 { get; set; }
-        public List<T> Conditions { get; set;}
-    }
 
     public class DobFilter
     {
@@ -85,8 +78,6 @@
     {
         public string FilterType { get; set; }
         public string Operator { get; set; }
-        public FilterCondition Condition1 { get; set; }
-        public FilterCondition Condition2 { get; set; }
         public List<FilterCondition> Conditions { get; set; }
     }
 }
