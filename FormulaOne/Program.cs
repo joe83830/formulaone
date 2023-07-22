@@ -1,8 +1,10 @@
 using FormulaOne.Data;
 using FormulaOne.Data.DTOs;
 using FormulaOne.Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,9 +35,19 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.MapGet("/drivers", async (AppDBContext db) =>
+app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
 {
     var drivers = await db.Drivers.ToListAsync();
+    var filter = context.Request.Query["filter"].FirstOrDefault();
+    Console.WriteLine("OUTSIDE IF");
+    Console.WriteLine(filter);
+
+    if (!string.IsNullOrEmpty(filter))
+    {
+        var filterObj = JsonConvert.DeserializeObject<Filter>(filter);
+        Console.WriteLine("JOE Filter incoming:");
+        Console.WriteLine(filterObj);
+    }
 
     return drivers.Select(d => new DriverDTO
     {
