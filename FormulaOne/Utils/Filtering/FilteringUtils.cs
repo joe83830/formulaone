@@ -53,15 +53,15 @@ namespace FormulaOne.Utils.Filtering
             return query;
         }
 
-        public static IQueryable<Driver> ApplyDateFilters(this IQueryable<Driver> query, Filter<DobFilter> filter)
-        {
-            if (filter != null)
-            {
-                foreach (var condition in filter.Conditions)
-                {
-                    var joinOperator
-                }
-            }
-        }
+        //public static IQueryable<Driver> ApplyDateFilters(this IQueryable<Driver> query, Filter<DobFilter> filter)
+        //{
+        //    if (filter != null)
+        //    {
+        //        foreach (var condition in filter.Conditions)
+        //        {
+        //            var joinOperator
+        //        }
+        //    }
+        //}
     }
 }
