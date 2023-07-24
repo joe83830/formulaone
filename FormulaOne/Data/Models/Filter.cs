@@ -1,83 +1,117 @@
-﻿namespace FormulaOne.Data.Models
+﻿using System.Runtime.Serialization;
+
+namespace FormulaOne.Data.Models
 {
-    public static class FilterType
+    public enum FilterType
     {
-        public static readonly string Text = "text";
-        public static readonly string Number = "number";
-        public static readonly string Date = "date";
+        [EnumMember(Value = "text")]
+        Text,
+        [EnumMember(Value = "number")]
+        Number,
+        [EnumMember(Value = "date")]
+        Date
     }
 
-    public static class ComparatorTypeString
+
+    public enum ComparatorTypeString
     {
-        public static readonly string Contains = "contains";
-        public static readonly string NotContains = "notContains";
-        public static readonly string GreaterThan = "greaterThan";
-        public static readonly string Equal = "equals";
-        public static readonly string NotEqual = "notEqual";
-        public static readonly string StartsWith = "startsWith";
-        public static readonly string EndsWith = "endsWith";
-        public static readonly string Blank = "blank";
-        public static readonly string NotBlank = "notBlank";
+        [EnumMember(Value = "contains")]
+        Contains,
+        [EnumMember(Value = "notContains")]
+        NotContains,
+        [EnumMember(Value = "greaterThan")]
+        GreaterThan,
+        [EnumMember(Value = "equals")]
+        Equals,
+        [EnumMember(Value = "notEqual")]
+        NotEqual,
+        [EnumMember(Value = "startsWith")]
+        StartsWith,
+        [EnumMember(Value = "endsWith")]
+        EndsWith,
+        [EnumMember(Value = "blank")]
+        Blank,
+        [EnumMember(Value = "notBlank")]
+        NotBlank
     }
 
-    public static class ComparatorTypeNumber
+    public enum ComparatorTypeNumber
     {
-        public static readonly string GreaterThan = "greaterThan";
-        public static readonly string GreaterThanOrEqual = "greaterThanOrEqual";
-        public static readonly string LessThan = "lessThan";
-        public static readonly string LessThanOrEqual = "lessThanOrEqual";
-        public static readonly string Equal = "equals";
-        public static readonly string NotEqual = "notEqual";
-        public static readonly string InRange = "inRange";
-        public static readonly string Blank = "blank";
-        public static readonly string NotBlank = "notBlank";
+        [EnumMember(Value = "greaterThan")]
+        GreaterThan,
+        [EnumMember(Value = "greaterThanOrEqual")]
+        GreaterThanOrEqual,
+        [EnumMember(Value = "lessThan")]
+        LessThan,
+        [EnumMember(Value = "lessThanOrEqual")]
+        LessThanOrEqual,
+        [EnumMember(Value = "equals")]
+        Equals,
+        [EnumMember(Value = "notEqual")]
+        NotEqual,
+        [EnumMember(Value = "inRange")]
+        InRange,
+        [EnumMember(Value = "blank")]
+        Blank,
+        [EnumMember(Value = "notBlank")]
+        NotBlank
     }
 
-    public static class ComparatorTypeDate
+    public enum ComparatorTypeDate
     {
-        public static readonly string GreaterThan = "greaterThan";
-        public static readonly string LessThan = "lessThan";
-        public static readonly string Equal = "equals";
-        public static readonly string NotEqual = "notEqual";
-        public static readonly string InRange = "inRange";
-        public static readonly string Blank = "blank";
-        public static readonly string NotBlank = "notBlank";
+        [EnumMember(Value = "greaterThan")]
+        GreaterThan,
+        [EnumMember(Value = "lessThan")]
+        LessThan,
+        [EnumMember(Value = "equals")]
+        Equals,
+        [EnumMember(Value = "notEqual")]
+        NotEqual,
+        [EnumMember(Value = "inRange")]
+        InRange,
+        [EnumMember(Value = "blank")]
+        Blank,
+        [EnumMember(Value = "notBlank")]
+        NotBlank
     }
 
-    public static class OperatorType
+    public enum OperatorType
     {
-        public static readonly string And = "AND";
-        public static readonly string Or = "OR";
-        public static readonly string NONE = "NONE";
+        [EnumMember(Value = "AND")]
+        And,
+        [EnumMember(Value = "OR")]
+        Or,
+        [EnumMember(Value = "NONE")]
+        None
     }
+
 
 
     public class DobFilter
     {
         public DateTime DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
-        public string FilterType { get; set; }
-        public string Type { get; set; }
+        public FilterType FilterType { get; set; }
+        public ComparatorTypeDate Type { get; set; }
     }
 
     public class NationalityFilter
     {
-        public string FilterType { get; set; }
-        public string Type { get; set; }
+        public FilterType FilterType { get; set; }
+        public ComparatorTypeString Type { get; set; }
         public string Filter { get; set; }
     }
 
-    public class FilterCondition
+    public class Filter<T>
     {
-        public string FilterType { get; set; }
-        public string Type { get; set; }
-        public string Filter { get; set; }
+        public FilterType FilterType { get; set; }
+        public OperatorType Operator { get; set; }
+        public List<T> Conditions { get; set; }
     }
 
-    public class Filter
+    public class ConsolidatedFilter
     {
-        public string FilterType { get; set; }
-        public string Operator { get; set; }
-        public List<FilterCondition> Conditions { get; set; }
+        public Filter<NationalityFilter>? Nationality { get; set; }
+        public Filter<DobFilter>? Dob { get; set; }
     }
 }

@@ -37,18 +37,36 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
 {
-    var drivers = await db.Drivers.ToListAsync();
+    IQueryable<Driver> query = db.Drivers;
     var filter = context.Request.Query["filter"].FirstOrDefault();
     Console.WriteLine("OUTSIDE IF");
     Console.WriteLine(filter);
 
     if (!string.IsNullOrEmpty(filter))
     {
-        var filterObj = JsonConvert.DeserializeObject<Filter>(filter);
-        Console.WriteLine("JOE Filter incoming:");
-        Console.WriteLine(filterObj);
+        try
+        {
+            var filterObj = JsonConvert.DeserializeObject<ConsolidatedFilter>(filter);
+            Console.WriteLine("JOE Filter incoming:");
+            Console.WriteLine(filterObj);
+            if (filterObj.Nationality != null)
+            {
+                var joinOperator = filterObj.Nationality.Operator;
+                foreach(NationalityFilter condition in filterObj.Nationality.Conditions)
+                {
+                    var comparatorType = condition.Type;
+                    query = query.Where(driver => driver.Nationality.Contains(condition.Filter));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+        }
+
     }
 
+    var drivers = await query.ToListAsync();
     return drivers.Select(d => new DriverDTO
     {
         driverRef = d.DriverRef,
