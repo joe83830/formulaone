@@ -40,9 +40,9 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
-            "LinqKit": {
+            "LinqKit.Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[1.2.4, )"
+              "version": "[7.1.4, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",

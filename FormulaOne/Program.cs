@@ -1,7 +1,7 @@
 using FormulaOne.Data;
 using FormulaOne.Data.DTOs;
 using FormulaOne.Data.Models;
-using Microsoft.AspNetCore.Mvc;
+using FormulaOne.Utils.Filtering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -51,12 +51,8 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
             Console.WriteLine(filterObj);
             if (filterObj.Nationality != null)
             {
-                var joinOperator = filterObj.Nationality.Operator;
-                foreach(NationalityFilter condition in filterObj.Nationality.Conditions)
-                {
-                    var comparatorType = condition.Type;
-                    query = query.Where(driver => driver.Nationality.Contains(condition.Filter));
-                }
+                query = query.ApplyTextFilters(filterObj.Nationality);
+                query = query.ApplyDateFilters(filterObj.Dob);
             }
         }
         catch (Exception ex)
@@ -66,8 +62,12 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
 
     }
 
+    Console.WriteLine("Joe constructed LINQ query");
+    Console.WriteLine(query.ToString());
     var drivers = await query.ToListAsync();
-    return drivers.Select(d => new DriverDTO
+    Console.WriteLine("Joe Drivers");
+    Console.WriteLine(drivers);
+;    return drivers.Select(d => new DriverDTO
     {
         driverRef = d.DriverRef,
         number = d.Number,
