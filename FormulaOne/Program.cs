@@ -49,16 +49,23 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
             var filterObj = JsonConvert.DeserializeObject<ConsolidatedFilter>(filter);
             Console.WriteLine("JOE Filter incoming:");
             Console.WriteLine(filterObj);
+            if (filterObj.Forename != null)
+            {
+                query = query.ApplyTextFilters(filterObj.Forename, driver => driver.Forename);
+            }
+            if (filterObj.Surname != null)
+            {
+                query = query.ApplyTextFilters(filterObj.Surname, driver => driver.Surname);
+            }
             if (filterObj.Nationality != null)
             {
                 query = query.ApplyTextFilters(filterObj.Nationality, driver => driver.Nationality);
             }
-            if (filterObj.Forename != null)
+            if (filterObj.Code != null)
             {
-                Console.WriteLine("JOE has forname filter");
-                query = query.ApplyTextFilters(filterObj.Forename, driver => driver.Forename);
+                query = query.ApplyTextFilters(filterObj.Code, driver => driver.Code);
             }
-            if (filterObj != null)
+            if (filterObj.Dob != null)
             {
                 query = query.ApplyDateFilters(filterObj.Dob);
             }
