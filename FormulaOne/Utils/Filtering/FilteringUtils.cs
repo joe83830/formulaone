@@ -1,18 +1,36 @@
 ﻿using FormulaOne.Data.Models;
 using LinqKit;
+using System.Linq.Expressions;
 
 namespace FormulaOne.Utils.Filtering
 {
     public static class FilteringUtils
     {
-        public static IQueryable<Driver> ApplyTextFilters(this IQueryable<Driver> query, Filter<NationalityFilter> filter)
+        private static Expression<Func<Driver, bool>> BuildContainsExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var parameterExp = fieldSelector.Parameters[0];
+            var propertyExp = fieldSelector.Body;
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            var filterTextExp = Expression.Constant(filterText);
+
+            var containsExp = Expression.Call(propertyExp, containsMethod, filterTextExp);
+
+            return Expression.Lambda<Func<Driver, bool>>(containsExp, parameterExp);
+        }
+
+        public static Expression<Func<Driver, bool>> ModifyPredicate(Expression<Func<Driver, bool>> predicate, OperatorType operatorType, Expression<Func<Driver, bool>> newCondition)
+        {
+            return operatorType == OperatorType.Or ? predicate.Or(newCondition) : predicate.And(newCondition);
+        }
+
+        public static IQueryable<Driver> ApplyTextFilters(this IQueryable<Driver> query, Filter<TextFilter> filter, Expression<Func<Driver, string>> fieldSelector)
         {
             if (filter != null)
             {
                 var joinOperator = filter.Operator;
                 var predicate = joinOperator == OperatorType.Or ? PredicateBuilder.New<Driver>(false) : PredicateBuilder.New<Driver>(true);
 
-                foreach (NationalityFilter condition in filter.Conditions)
+                foreach (var condition in filter.Conditions)
                 {
                     var filterText = condition.Filter.Trim();
                     Console.WriteLine(filterText);
@@ -20,8 +38,8 @@ namespace FormulaOne.Utils.Filtering
                     switch (condition.Type)
                     {
                         case ComparatorTypeString.Contains:
-                            Console.WriteLine("HIT CONDITION");
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => driver.Nationality.Contains(filterText)) : predicate.And(driver => driver.Nationality.Contains(filterText));
+                            var containsPredicate = BuildContainsExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, containsPredicate);
                             break;
                         case ComparatorTypeString.NotContains:
                             predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => !driver.Nationality.Contains(filterText)) : predicate.And(driver => !driver.Nationality.Contains(filterText));

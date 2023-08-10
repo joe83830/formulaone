@@ -51,7 +51,7 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
             Console.WriteLine(filterObj);
             if (filterObj.Nationality != null)
             {
-                query = query.ApplyTextFilters(filterObj.Nationality);
+                query = query.ApplyTextFilters(filterObj.Nationality, driver => driver.Nationality);
                 query = query.ApplyDateFilters(filterObj.Dob);
             }
         }
