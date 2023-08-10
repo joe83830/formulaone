@@ -85,14 +85,6 @@ namespace FormulaOne.Data.Models
         None
     }
 
-
-    //public interface ITextFilter
-    //{
-    //    FilterType FilterType { get; }
-    //    ComparatorTypeString Type { get; }
-    //    string Filter { get; }
-    //}
-
     public class DobFilter
     {
         public DateTime DateFrom { get; set; }
@@ -118,6 +110,9 @@ namespace FormulaOne.Data.Models
     public class ConsolidatedFilter
     {
         public Filter<TextFilter>? Nationality { get; set; }
+        public Filter<TextFilter>? Forename { get; set; }
+        public Filter<TextFilter>? Surname { get; set; }
+        public Filter<TextFilter>? Code { get; set; }
         public Filter<DobFilter>? Dob { get; set; }
     }
 }

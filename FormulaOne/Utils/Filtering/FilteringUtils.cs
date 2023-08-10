@@ -18,7 +18,62 @@ namespace FormulaOne.Utils.Filtering
             return Expression.Lambda<Func<Driver, bool>>(containsExp, parameterExp);
         }
 
-        public static Expression<Func<Driver, bool>> ModifyPredicate(Expression<Func<Driver, bool>> predicate, OperatorType operatorType, Expression<Func<Driver, bool>> newCondition)
+        private static Expression<Func<Driver, bool>> BuildNotContainsExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var containsExp = BuildContainsExpression(fieldSelector, filterText);
+            var notContainsExp = Expression.Not(containsExp.Body);
+            return Expression.Lambda<Func<Driver, bool>>(notContainsExp, containsExp.Parameters.Single());
+        }
+
+        private static Expression<Func<Driver, bool>> BuildEqualsExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var propertyExp = fieldSelector.Body;
+            var constantExp = Expression.Constant(filterText);
+            return Expression.Lambda<Func<Driver, bool>>(Expression.Equal(propertyExp, constantExp), fieldSelector.Parameters);
+        }
+
+        private static Expression<Func<Driver, bool>> BuildNotEqualsExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var propertyExp = fieldSelector.Body;
+            var constantExp = Expression.Constant(filterText);
+            return Expression.Lambda<Func<Driver, bool>>(Expression.NotEqual(propertyExp, constantExp), fieldSelector.Parameters);
+        }
+
+        private static Expression<Func<Driver, bool>> BuildStartsWithExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string) });
+            var propertyExp = fieldSelector.Body;
+            var constantExp = Expression.Constant(filterText);
+            var startsWithExp = Expression.Call(propertyExp, startsWithMethod, constantExp);
+            return Expression.Lambda<Func<Driver, bool>>(startsWithExp, fieldSelector.Parameters);
+        }
+
+        private static Expression<Func<Driver, bool>> BuildEndsWithExpression(Expression<Func<Driver, string>> fieldSelector, string filterText)
+        {
+            var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string) });
+            var propertyExp = fieldSelector.Body;
+            var constantExp = Expression.Constant(filterText);
+            var endsWithExp = Expression.Call(propertyExp, endsWithMethod, constantExp);
+            return Expression.Lambda<Func<Driver, bool>>(endsWithExp, fieldSelector.Parameters);
+        }
+
+        private static Expression<Func<Driver, bool>> BuildIsNullOrEmptyExpression(Expression<Func<Driver, string>> fieldSelector)
+        {
+            var isNullOrEmptyMethod = typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) });
+            var propertyExp = fieldSelector.Body;
+            var isNullOrEmptyExp = Expression.Call(isNullOrEmptyMethod, propertyExp);
+            return Expression.Lambda<Func<Driver, bool>>(isNullOrEmptyExp, fieldSelector.Parameters);
+        }
+
+        private static Expression<Func<Driver, bool>> BuildIsNotNullOrEmptyExpression(Expression<Func<Driver, string>> fieldSelector)
+        {
+            var isNullOrEmptyExp = BuildIsNullOrEmptyExpression(fieldSelector).Body;
+            var notExp = Expression.Not(isNullOrEmptyExp);
+            return Expression.Lambda<Func<Driver, bool>>(notExp, fieldSelector.Parameters);
+        }
+
+
+        private static Expression<Func<Driver, bool>> ModifyPredicate(Expression<Func<Driver, bool>> predicate, OperatorType operatorType, Expression<Func<Driver, bool>> newCondition)
         {
             return operatorType == OperatorType.Or ? predicate.Or(newCondition) : predicate.And(newCondition);
         }
@@ -42,25 +97,32 @@ namespace FormulaOne.Utils.Filtering
                             predicate = ModifyPredicate(predicate, joinOperator, containsPredicate);
                             break;
                         case ComparatorTypeString.NotContains:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => !driver.Nationality.Contains(filterText)) : predicate.And(driver => !driver.Nationality.Contains(filterText));
+                            var notContainsPredicate = BuildNotContainsExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, notContainsPredicate);
                             break;
                         case ComparatorTypeString.Equals:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => driver.Nationality == filterText) : predicate.And(driver => driver.Nationality == filterText);
+                            var equalsPredicate = BuildEqualsExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, equalsPredicate);
                             break;
                         case ComparatorTypeString.NotEqual:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => driver.Nationality != filterText) : predicate.And(driver => driver.Nationality != filterText);
+                            var notEqualsPredicate = BuildNotEqualsExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, notEqualsPredicate);
                             break;
                         case ComparatorTypeString.StartsWith:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => driver.Nationality.StartsWith(filterText)) : predicate.And(driver => driver.Nationality.StartsWith(filterText));
+                            var startsWithPredicate = BuildStartsWithExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, startsWithPredicate);
                             break;
                         case ComparatorTypeString.EndsWith:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => driver.Nationality.EndsWith(filterText)) : predicate.And(driver => driver.Nationality.EndsWith(filterText));
+                            var endsWithPredicate = BuildEndsWithExpression(fieldSelector, filterText);
+                            predicate = ModifyPredicate(predicate, joinOperator, endsWithPredicate);
                             break;
                         case ComparatorTypeString.Blank:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => string.IsNullOrEmpty(driver.Nationality)) : predicate.And(driver => string.IsNullOrEmpty(driver.Nationality));
+                            var isNullOrEmptyPredicate = BuildIsNullOrEmptyExpression(fieldSelector);
+                            predicate = ModifyPredicate(predicate, joinOperator, isNullOrEmptyPredicate);
                             break;
                         case ComparatorTypeString.NotBlank:
-                            predicate = joinOperator == OperatorType.Or ? predicate.Or(driver => string.IsNullOrEmpty(driver.Nationality)) : predicate.And(driver => string.IsNullOrEmpty(driver.Nationality));
+                            var isNotNullOrEmptyPredicate = BuildIsNotNullOrEmptyExpression(fieldSelector);
+                            predicate = ModifyPredicate(predicate, joinOperator, isNotNullOrEmptyPredicate);
                             break;
                         default:
                             throw new Exception($"Unsupported comparator type: {condition.Type}");

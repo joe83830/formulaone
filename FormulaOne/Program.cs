@@ -52,6 +52,14 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
             if (filterObj.Nationality != null)
             {
                 query = query.ApplyTextFilters(filterObj.Nationality, driver => driver.Nationality);
+            }
+            if (filterObj.Forename != null)
+            {
+                Console.WriteLine("JOE has forname filter");
+                query = query.ApplyTextFilters(filterObj.Forename, driver => driver.Forename);
+            }
+            if (filterObj != null)
+            {
                 query = query.ApplyDateFilters(filterObj.Dob);
             }
         }
