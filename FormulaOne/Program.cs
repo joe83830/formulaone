@@ -84,6 +84,7 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
     Console.WriteLine(drivers);
 ;    return drivers.Select(d => new DriverDTO
     {
+        id = d.DriverId,
         driverRef = d.DriverRef,
         number = d.Number,
         code = d.Code,
