@@ -127,7 +127,14 @@ app.MapGet("/driver/laptimes/{driverId:int}", async (AppDBContext dbContext, int
         .Select(g => new
         {
             RaceId = g.Key,
-            LapTimes = g.ToList()
+            LapTimes = g.Select(lt => new DriverLapTimeDTO
+            {
+                lap = lt.Lap,
+                position = lt.Position,
+                lapTimeId = lt.LapTimeId,
+                milliseconds = lt.Milliseconds,
+                raceId = lt.RaceId,
+            }).ToList()
         })
         .ToList();
 
