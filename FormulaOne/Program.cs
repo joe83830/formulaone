@@ -98,7 +98,7 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
 
 app.MapGet("/driver/laptimes/{driverId:int}", async (AppDBContext dbContext, int driverId, HttpContext httpContext) =>
 {
-    const int pageSize = 10;
+    const int pageSize = 5;
     var page = httpContext.Request.Query.ContainsKey("page") ? int.Parse(httpContext.Request.Query["page"]) : 1;
 
     var totalLapTimes = await dbContext.LapTimes
@@ -122,8 +122,14 @@ app.MapGet("/driver/laptimes/{driverId:int}", async (AppDBContext dbContext, int
         .Where(lt => raceIdsForDriver.Contains(lt.RaceId) && lt.DriverId == driverId)
         .ToListAsync();
 
+    var driver = await dbContext.Drivers
+        .Where(d => d.DriverId == driverId)
+        .Select(d => d.Forename + " " + d.Surname)
+        .FirstOrDefaultAsync();
+
     var groupedLapTimes = lapTimesForRaces
         .GroupBy(lt => lt.RaceId)
+        .OrderBy(g => g.Key)
         .Select(g => new
         {
             RaceId = g.Key,
@@ -151,7 +157,8 @@ app.MapGet("/driver/laptimes/{driverId:int}", async (AppDBContext dbContext, int
     var result = new
     {
         Metadata = metadata,
-        Data = groupedLapTimes
+        Data = groupedLapTimes,
+        Name = driver
     };
 
     return Results.Ok(result);

@@ -7,5 +7,6 @@
         public int milliseconds { get; set; }
         public int position { get; set; }
         public int raceId { get; set; }
+        public string name { get; set; }
     }
 }
