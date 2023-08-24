@@ -2,6 +2,7 @@ using FormulaOne.Data;
 using FormulaOne.Data.DTOs;
 using FormulaOne.Data.Models;
 using FormulaOne.Utils.Filtering;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -82,7 +83,7 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
     var drivers = await query.ToListAsync();
     Console.WriteLine("Joe Drivers");
     Console.WriteLine(drivers);
-;    return drivers.Select(d => new DriverDTO
+;    return Results.Ok(drivers.Select(d => new DriverDTO
     {
         id = d.DriverId,
         driverRef = d.DriverRef,
@@ -92,8 +93,65 @@ app.MapGet("/drivers", async (AppDBContext db, HttpContext context) =>
         surname = d.Surname,
         dob = d.Dob,
         nationality = d.Nationality
-    }).ToList();
+    }).ToList());
 });
+
+app.MapGet("/driver/laptimes/{driverId:int}", async (AppDBContext dbContext, int driverId, HttpContext httpContext) =>
+{
+    const int pageSize = 10;
+    var page = httpContext.Request.Query.ContainsKey("page") ? int.Parse(httpContext.Request.Query["page"]) : 1;
+
+    var totalLapTimes = await dbContext.LapTimes
+        .Where(lt => lt.DriverId == driverId)
+        .Select(lt => lt.RaceId)
+        .Distinct()
+        .CountAsync();
+
+    var totalPageCount = (int)Math.Ceiling(totalLapTimes / (double)pageSize);
+
+    var raceIdsForDriver = await dbContext.LapTimes
+        .Where(lt => lt.DriverId == driverId)
+        .OrderBy(lt => lt.RaceId)
+        .Select(lt => lt.RaceId)
+        .Distinct()
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+
+    var lapTimesForRaces = await dbContext.LapTimes
+        .Where(lt => raceIdsForDriver.Contains(lt.RaceId) && lt.DriverId == driverId)
+        .ToListAsync();
+
+    var groupedLapTimes = lapTimesForRaces
+        .GroupBy(lt => lt.RaceId)
+        .Select(g => new
+        {
+            RaceId = g.Key,
+            LapTimes = g.ToList()
+        })
+        .ToList();
+
+    var metadata = new
+    {
+        CurrentPage = page,
+        PageSize = pageSize,
+        TotalItems = totalLapTimes,
+        TotalPages = totalPageCount,
+        HasNextPage = page < totalPageCount,
+        HasPreviousPage = page > 1
+    };
+
+    var result = new
+    {
+        Metadata = metadata,
+        Data = groupedLapTimes
+    };
+
+    return Results.Ok(result);
+});
+
+
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(swaggerUIOptions =>
